@@ -8,7 +8,7 @@ import scrollphat
 import Adafruit_VCNL40xx
 
 # as this starts at boot, we want to give some time for cool animation that plays for 5 seconds from another file
-time.sleep(6)
+time.sleep(0)
 scrollphat.set_brightness(5)
 
 # Create a VCNL4010 instance.
@@ -21,24 +21,20 @@ def prox():
   while True:
     # Read proximity.
     proximity = vcnl.read_proximity()
-    # Print out the results.
     if proximity > dist:
       print('Proximity={0}'.format(proximity))
-      time.sleep(1)
-      return True 
-    # Wait some time and repeat.
-    time.sleep(0.05)
+      time.sleep(0.5)
+      return True
     return False
-              
+
 
 # define databases to read the news from
 db_1 = '/home/pi/Pimoroni/scrollphat/feed_1.db'
 db_2 = '/home/pi/Pimoroni/scrollphat/feed_2.db'
 
-f = open(db_1)
-print iter(f)
-while True:
-    try:
+def news(db):
+        f = open(db)
+        print iter(f)
         for msg in iter(f):
 #               this is to ensure no non-ASCII stuff goes through, otherwise program shuts down
                 msg = msg.decode('utf-8', errors='ignore').encode('utf-8')
@@ -55,12 +51,22 @@ while True:
                                 scrollphat.scroll()
                                 time.sleep(0.035)
                                 if prox():
-                                  f.close()
+                                        f.close()
+                                        return
                 else: print('no data to show, jumping to next line')
-        else:
+
+        else:   
                 f.close()
-                f = open(db)
-    except KeyboardInterrupt:
-        scrollphat.clear()
-        f.close()
-        sys.exit(-1)
+                f = open(db_1)
+                print iter(f)
+
+while True:
+        try:
+                news(db_1)
+                news(db_2)
+        except KeyboardInterrupt:
+                scrollphat.clear()
+#               f.close()
+                sys.exit(-1)
+
+
